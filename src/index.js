@@ -1,4 +1,5 @@
 require("dotenv").config()
+require("./server")
 const MergePullRequest = require("./service/api").MergePullRequest
 const Reaction = require("./enum/reaction").Reaction
 const ReactionID = require("./enum/reaction").ReactionID
