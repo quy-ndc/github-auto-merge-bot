@@ -23,7 +23,6 @@ client.once('ready', () => {
 })
 
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
-    console.log(`Reaction added: ${reaction.emoji.name}:${reaction.emoji.id}`)
     try {
         // User can't be a bot
         if (user.bot) return
