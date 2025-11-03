@@ -35,7 +35,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         if (reaction.emoji.name !== Reaction.APPROVE) return
 
         // Reactor can't be the message's author
-        // if (user.id === reaction.message.author.id) return
+        if (user.id === reaction.message.author.id) return
 
         // Message must be a pull request link
         const match = reaction.message.content.match(/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/)
