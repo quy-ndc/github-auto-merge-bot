@@ -9,14 +9,11 @@ const { API_ENDPOINT } = require("./endpoint")
  */
 async function MergePullRequest(owner, repo, pullNumber) {
     try {
-        // const response = await axiosClient.put(`${API_ENDPOINT.MERGE_PULL_REQUEST}/${owner}/${repo}/pulls/${pullNumber}/merge`, {
-        //     merge_method: "squash",
-        // })
-        console.log(`${owner}/${repo} - Merging PR #${pullNumber}...`)
-        console.log(`✅ PR #${pullNumber} merged successfully!`)
-        // return response.data
+        const response = await axiosClient.put(`${API_ENDPOINT.MERGE_PULL_REQUEST}/${owner}/${repo}/pulls/${pullNumber}/merge`, {
+            merge_method: "squash",
+        })
+        return response.data
     } catch (error) {
-        console.error(`❌ Failed to merge PR #${pullNumber}:`, error.response?.data || error.message)
         throw error
     }
 }

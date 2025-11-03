@@ -1,8 +1,10 @@
 require("dotenv").config()
 require("./server")
 const MergePullRequest = require("./service/api").MergePullRequest
+const createEmbedMessage = require("./util/create-embed-message").createEmbedMessage
 const Reaction = require("./enum/reaction").Reaction
 const ReactionID = require("./enum/reaction").ReactionID
+const Color = require("./enum/color").Color
 
 const { Client, GatewayIntentBits, Events } = require('discord.js')
 
@@ -21,6 +23,7 @@ client.once('ready', () => {
 })
 
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
+    console.log(`Reaction added: ${reaction.emoji.name}:${reaction.emoji.id}`)
     try {
         // User can't be a bot
         if (user.bot) return
@@ -44,33 +47,38 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
         const loadingReaction = await reaction.message.react(`<:${Reaction.MERGING}:${ReactionID.MERGING}>`)
 
-        setTimeout(async () => {
+        try {
+            const response = await MergePullRequest(owner, repo, pullNumber)
+
+            if (response.merged) {
+                await loadingReaction.remove()
+                await reaction.message.react(`<:${Reaction.MERGE_SUCCESS}:${ReactionID.MERGE_SUCCESS}>`)
+                const embed = createEmbedMessage(
+                    Color.SUCCESS,
+                    `Pull Request #${pullNumber} was merged successfully`,
+                    `Merged by @${user.tag}`
+                )
+                await reaction.message.reply({ embeds: [embed] })
+            } else {
+                await loadingReaction.remove()
+                await reaction.message.react(`<:${Reaction.FAILED}:${ReactionID.FAILED}>`)
+                const embed = createEmbedMessage(
+                    Color.FAIL,
+                    `Pull Request #${pullNumber} failed to merged`,
+                    `PR create by @${reaction.message.author.username}`
+                )
+                await reaction.message.reply({ embeds: [embed] })
+            }
+        } catch (err) {
             await loadingReaction.remove()
-        }, 1000)
-
-        await reaction.message.react(`<:${Reaction.MERGE_SUCCESS}:${ReactionID.MERGE_SUCCESS}>`)
-
-        // try {
-        //     const response = await MergePullRequest(owner, repo, pullNumber)
-
-        //     if (result.merged) {
-        //         await reaction.message.react("✅")
-        //         await reaction.message.reply(
-        //             `✅ Successfully merged **PR #${pullNumber}** from **${repo}**.`
-        //         )
-        //     } else {
-        //         await reaction.message.react("⚠️")
-        //         await reaction.message.reply(
-        //             `⚠️ Merge attempt failed for **PR #${pullNumber}**: ${result.message}`
-        //         )
-        //     }
-        // } catch (err) {
-        //     await reaction.message.react("❌")
-        //     await reaction.message.reply(
-        //         `❌ Failed to merge **PR #${pullNumber}**. Error: ${err.message}`
-        //     )
-        // }
-
+            await reaction.message.react(`<:${Reaction.WARNING}:${ReactionID.WARNING}>`)
+            const embed = createEmbedMessage(
+                Color.WARNING,
+                `Pull Request #${pullNumber} ran into an error`,
+                `Error: ${err.message}`
+            )
+            await reaction.message.reply({ embeds: [embed] })
+        }
     } catch (err) {
         console.error("Error handling reaction:", err)
     }

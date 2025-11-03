@@ -21,7 +21,7 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
     (response) => response,
     (error) => {
-        console.error("❌ Axios error:", error.message)
+        console.error("Axios error:", error.message)
         return Promise.reject(error)
     }
 )
