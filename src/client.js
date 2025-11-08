@@ -7,7 +7,11 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessageReactions,
     ],
-    partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
+    partials: [
+        Partials.Message,
+        Partials.Channel,
+        Partials.Reaction
+    ],
 })
 
 module.exports = { client }
